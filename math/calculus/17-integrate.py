@@ -1,4 +1,4 @@
-#!/usr/bin/env
+#!/usr/bin/env python3
 def poly_integral(poly, c=0):
     """
     Calculates the integral of a polynomial.
@@ -20,15 +20,14 @@ def poly_integral(poly, c=0):
     for i in range(len(poly)):
         new_coeff = poly[i] / (i + 1)
         
-        # Convert to integer if it's a whole number (e.g., 5.0 -> 5)
+        # Convert to integer if it is a whole number (e.g., 4.0 -> 4)
         if new_coeff == int(new_coeff):
             new_coeff = int(new_coeff)
             
         integral.append(new_coeff)
 
-    # The prompt asks for the list to be as small as possible.
-    # We remove trailing zeros from the end of the list, 
-    # but keep at least the constant term.
+    # The returned list should be as small as possible
+    # We remove trailing zeros from the end of the list
     while len(integral) > 1 and integral[-1] == 0:
         integral.pop()
 
