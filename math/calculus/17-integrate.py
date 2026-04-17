@@ -1,3 +1,4 @@
+#!/usr/bin/env
 def poly_integral(poly, c=0):
     """
     Calculates the integral of a polynomial.
