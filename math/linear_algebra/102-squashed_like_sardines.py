@@ -2,6 +2,23 @@
 """Module for concatenating two matrices along a specific axis."""
 
 
+def get_shape(matrix):
+    """Get the shape of a nested list matrix.
+
+    Args:
+        matrix: A nested list of ints/floats.
+
+    Returns:
+        A list of integers representing the shape.
+    """
+    shape = []
+    current = matrix
+    while isinstance(current, list):
+        shape.append(len(current))
+        current = current[0]
+    return shape
+
+
 def cat_matrices(mat1, mat2, axis=0):
     """Concatenate two matrices along a specific axis.
 
@@ -13,19 +30,18 @@ def cat_matrices(mat1, mat2, axis=0):
     Returns:
         A new matrix with the matrices concatenated, or None if invalid.
     """
-    if not isinstance(mat1, list) or not isinstance(mat2, list):
+    shape1 = get_shape(mat1)
+    shape2 = get_shape(mat2)
+    if len(shape1) != len(shape2):
         return None
+    for i in range(len(shape1)):
+        if i != axis and shape1[i] != shape2[i]:
+            return None
     if axis == 0:
-        if isinstance(mat1[0], list) != isinstance(mat2[0], list):
-            return None
-        if isinstance(mat1[0], list) and len(mat1[0]) != len(mat2[0]):
-            return None
         return [row[:] if isinstance(row, list)
                 else row for row in mat1] + \
                [row[:] if isinstance(row, list)
                 else row for row in mat2]
-    if len(mat1) != len(mat2):
-        return None
     result = [cat_matrices(mat1[i], mat2[i], axis - 1)
               for i in range(len(mat1))]
     if None in result:
