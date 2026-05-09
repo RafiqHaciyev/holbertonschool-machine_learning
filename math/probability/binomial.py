@@ -51,7 +51,6 @@ class Binomial:
         if k < 0 or k > self.n:
             return 0
 
-        # Calculate n! / (k! * (n-k)!)
         def factorial(x):
             """Calculates the factorial of x"""
             result = 1
@@ -59,5 +58,6 @@ class Binomial:
                 result *= i
             return result
 
-        coefficient = factorial(self.n) / (factorial(k) * factorial(self.n - k))
-        return coefficient * (self.p ** k) * ((1 - self.p) ** (self.n - k))
+        coeff = (factorial(self.n) //
+                 (factorial(k) * factorial(self.n - k)))
+        return coeff * (self.p ** k) * ((1 - self.p) ** (self.n - k))
