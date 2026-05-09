@@ -36,3 +36,28 @@ class Binomial:
             p = 1 - (variance / mean)
             self.n = round(mean / p)
             self.p = float(mean / self.n)
+
+    def pmf(self, k):
+        """Calculates the value of the PMF for a given number of successes
+
+        Args:
+            k (int): number of successes
+
+        Returns:
+            float: PMF value for k, or 0 if out of range
+        """
+        k = int(k)
+
+        if k < 0 or k > self.n:
+            return 0
+
+        # Calculate n! / (k! * (n-k)!)
+        def factorial(x):
+            """Calculates the factorial of x"""
+            result = 1
+            for i in range(1, x + 1):
+                result *= i
+            return result
+
+        coefficient = factorial(self.n) / (factorial(k) * factorial(self.n - k))
+        return coefficient * (self.p ** k) * ((1 - self.p) ** (self.n - k))
