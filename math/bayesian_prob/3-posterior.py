@@ -15,11 +15,20 @@ def likelihood(x, n, P):
     Returns:
         numpy.ndarray: 1D array of likelihoods for each probability in P.
     """
-    n_fact = np.prod(np.arange(1, n + 1))
-    x_fact = np.prod(np.arange(1, x + 1))
-    nx_fact = np.prod(np.arange(1, n - x + 1))
-    coeff = n_fact / (x_fact * nx_fact)
-    return coeff * (P ** x) * ((1 - P) ** (n - x))
+    log_coeff = (np.sum(np.log(np.arange(1, n + 1))) -
+                 np.sum(np.log(np.arange(1, x + 1))) -
+                 np.sum(np.log(np.arange(1, n - x + 1))))
+
+    with np.errstate(divide='ignore'):
+        log_P = np.where(P > 0, np.log(P), 0)
+        log_1P = np.where((1 - P) > 0, np.log(1 - P), 0)
+
+    log_likelihood = log_coeff + x * log_P + (n - x) * log_1P
+
+    result = np.exp(log_likelihood)
+    result = np.where(P == 0, (0.0 if x > 0 else 1.0), result)
+    result = np.where(P == 1, (0.0 if x < n else 1.0), result)
+    return result
 
 
 def intersection(x, n, P, Pr):
