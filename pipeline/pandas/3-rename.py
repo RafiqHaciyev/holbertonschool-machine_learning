@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def rename(df):
-    """Renames Timestamp column to Datetime, converts values, returns Datetime and Close"""
+    """Renames Timestamp to Datetime, converts values, returns two columns"""
     df = df.rename(columns={'Timestamp': 'Datetime'})
     df['Datetime'] = pd.to_datetime(df['Datetime'], unit='s')
     return df[['Datetime', 'Close']]
