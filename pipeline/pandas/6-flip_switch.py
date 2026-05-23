@@ -3,5 +3,5 @@
 
 
 def flip_switch(df):
-    """Sorts data in reverse chronological order and transposes the DataFrame"""
+    """Sorts in reverse chronological order and transposes the DataFrame"""
     return df.sort_index(ascending=False).transpose()
