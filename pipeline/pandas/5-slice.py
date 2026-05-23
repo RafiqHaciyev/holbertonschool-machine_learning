@@ -3,5 +3,5 @@
 
 
 def slice(df):
-    """Extracts High, Low, Close, Volume_BTC columns every 60th row"""
-    return df[['High', 'Low', 'Close', 'Volume_BTC']][::60]
+    """Extracts High, Low, Close, Volume_(BTC) columns every 60th row"""
+    return df[['High', 'Low', 'Close', 'Volume_(BTC)']][::60]
