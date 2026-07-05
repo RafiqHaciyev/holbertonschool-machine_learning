@@ -61,3 +61,117 @@ class Node:
             str: the prefixed string.
         """
         lines = text.split("\n")
+        new_text = "    +--" + lines[0] + "\n"
+        for x in lines[1:]:
+            new_text += ("    |  " + x) + "\n"
+        return (new_text)
+
+    def right_child_add_prefix(self, text):
+        """Add a prefix to the string representation of the right child.
+
+        Args:
+            text (str): the string representation of the right child.
+
+        Returns:
+            str: the prefixed string.
+        """
+        lines = text.split("\n")
+        new_text = "    +--" + lines[0] + "\n"
+        for x in lines[1:]:
+            new_text += ("       " + x) + "\n"
+        return (new_text)
+
+    def __str__(self):
+        """Return a string representation of the node and its children."""
+        if self.is_root:
+            node_str = "root [feature={}, threshold={}]\n".format(
+                self.feature, self.threshold)
+        else:
+            node_str = "-> node [feature={}, threshold={}]\n".format(
+                self.feature, self.threshold)
+
+        left_str = self.left_child_add_prefix(str(self.left_child))
+        right_str = self.right_child_add_prefix(str(self.right_child))
+
+        return (node_str + left_str + right_str).rstrip("\n")
+
+
+class Leaf(Node):
+    """Represents a leaf node of a decision tree."""
+
+    def __init__(self, value, depth=None):
+        """Initialize a Leaf.
+
+        Args:
+            value: the value predicted by this leaf.
+            depth (int): the depth of this leaf in the tree.
+        """
+        super().__init__()
+        self.value = value
+        self.is_leaf = True
+        self.depth = depth
+
+    def max_depth_below(self):
+        """Return the depth of this leaf."""
+        return self.depth
+
+    def count_nodes_below(self, only_leaves=False):
+        """Count the nodes below this leaf.
+
+        Args:
+            only_leaves (bool): if True, count only leaf nodes.
+
+        Returns:
+            int: always 1, since a leaf counts itself.
+        """
+        return 1
+
+    def __str__(self):
+        """Return a string representation of the leaf."""
+        return "-> leaf [value={}]".format(self.value)
+
+
+class Decision_Tree():
+    """Represents a decision tree."""
+
+    def __init__(self, max_depth=10, min_pop=1, seed=0,
+                 split_criterion="random", root=None):
+        """Initialize a Decision_Tree.
+
+        Args:
+            max_depth (int): the maximum depth allowed for the tree.
+            min_pop (int): the minimum population required to split.
+            seed (int): the seed for the random number generator.
+            split_criterion (str): the criterion used to split nodes.
+            root (Node): the root node of the tree.
+        """
+        self.rng = np.random.default_rng(seed)
+        if root:
+            self.root = root
+        else:
+            self.root = Node(is_root=True)
+        self.explanatory = None
+        self.target = None
+        self.max_depth = max_depth
+        self.min_pop = min_pop
+        self.split_criterion = split_criterion
+        self.predict = None
+
+    def depth(self):
+        """Return the maximum depth of the decision tree."""
+        return self.root.max_depth_below()
+
+    def count_nodes(self, only_leaves=False):
+        """Count the nodes in the decision tree.
+
+        Args:
+            only_leaves (bool): if True, count only leaf nodes.
+
+        Returns:
+            int: the number of nodes (or leaves) in the tree.
+        """
+        return self.root.count_nodes_below(only_leaves=only_leaves)
+
+    def __str__(self):
+        """Return a string representation of the decision tree."""
+        return self.root.__str__()
