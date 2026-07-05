@@ -61,25 +61,3 @@ class Node:
             str: the prefixed string.
         """
         lines = text.split("\n")
-        new_text = "    +--" + lines[0] + "\n"
-        for x in lines[1:]:
-            new_text += ("    |  " + x) + "\n"
-        return (new_text)
-
-    def right_child_add_prefix(self, text):
-        """Add a prefix to the string representation of the right child.
-
-        Args:
-            text (str): the string representation of the right child.
-
-        Returns:
-            str: the prefixed string.
-        """
-        lines = text.split("\n")
-        new_text = "    +--" + lines[0] + "\n"
-        for x in lines[1:]:
-            new_text += ("       " + x) + "\n"
-        return (new_text)
-
-    def __str__(self):
-        """Return a string
