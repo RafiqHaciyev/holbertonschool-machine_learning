@@ -314,4 +314,154 @@ class Decision_Tree():
 
     def pred(self, x):
         """Predict the value for a single individual by recursively
-        traversing the tree
+        traversing the tree from the root.
+
+        Args:
+            x (numpy.ndarray): a 1D array representing a single
+                individual's features.
+
+        Returns:
+            The predicted value from the appropriate leaf.
+        """
+        return self.root.pred(x)
+
+    def np_extrema(self, arr):
+        """Return the minimum and maximum values of an array.
+
+        Args:
+            arr (numpy.ndarray): the array to compute extrema on.
+
+        Returns:
+            tuple: (min, max) of the array.
+        """
+        return np.min(arr), np.max(arr)
+
+    def random_split_criterion(self, node):
+        """Randomly choose a feature and threshold to split a node.
+
+        Args:
+            node (Node): the node to compute a split for.
+
+        Returns:
+            tuple: (feature, threshold) chosen at random.
+        """
+        diff = 0
+        while diff == 0:
+            feature = self.rng.integers(0, self.explanatory.shape[1])
+            feature_min, feature_max = self.np_extrema(
+                self.explanatory[:, feature][node.sub_population])
+            diff = feature_max - feature_min
+        x = self.rng.uniform()
+        threshold = (1 - x) * feature_min + x * feature_max
+        return feature, threshold
+
+    def fit(self, explanatory, target, verbose=0):
+        """Train the decision tree on the given data.
+
+        Args:
+            explanatory (numpy.ndarray): 2D array of shape
+                (n_individuals, n_features) containing the features.
+            target (numpy.ndarray): 1D array of size n_individuals
+                containing the target class for each individual.
+            verbose (int): if 1, print training statistics.
+        """
+        if self.split_criterion == "random":
+            self.split_criterion = self.random_split_criterion
+        else:
+            self.split_criterion = self.Gini_split_criterion
+        self.explanatory = explanatory
+        self.target = target
+        self.root.sub_population = np.ones_like(self.target, dtype='bool')
+
+        self.fit_node(self.root)
+
+        self.update_predict()
+
+        if verbose == 1:
+            print(f"""  Training finished.
+    - Depth                     : {self.depth()}
+    - Number of nodes           : {self.count_nodes()}
+    - Number of leaves          : {self.count_nodes(only_leaves=True)}
+    - Accuracy on training data : {
+                self.accuracy(self.explanatory, self.target)}""")
+
+    def fit_node(self, node):
+        """Recursively split a node until stopping criteria are met.
+
+        Args:
+            node (Node): the node to split.
+        """
+        node.feature, node.threshold = self.split_criterion(node)
+
+        above_threshold = self.explanatory[:, node.feature] > \
+            node.threshold
+        left_population = node.sub_population & above_threshold
+        right_population = node.sub_population & ~above_threshold
+
+        is_left_leaf = (node.depth + 1 == self.max_depth or
+                        np.sum(left_population) < self.min_pop or
+                        np.unique(self.target[left_population]).size == 1)
+
+        if is_left_leaf:
+            node.left_child = self.get_leaf_child(node, left_population)
+        else:
+            node.left_child = self.get_node_child(node, left_population)
+            self.fit_node(node.left_child)
+
+        is_right_leaf = (node.depth + 1 == self.max_depth or
+                         np.sum(right_population) < self.min_pop or
+                         np.unique(self.target[right_population]).size == 1)
+
+        if is_right_leaf:
+            node.right_child = self.get_leaf_child(node, right_population)
+        else:
+            node.right_child = self.get_node_child(node, right_population)
+            self.fit_node(node.right_child)
+
+    def get_leaf_child(self, node, sub_population):
+        """Create a leaf child for a node.
+
+        Args:
+            node (Node): the parent node.
+            sub_population (numpy.ndarray): boolean array marking
+                which individuals belong to this leaf.
+
+        Returns:
+            Leaf: the newly created leaf.
+        """
+        values, counts = np.unique(
+            self.target[sub_population], return_counts=True)
+        value = values[np.argmax(counts)]
+        leaf_child = Leaf(value)
+        leaf_child.depth = node.depth + 1
+        leaf_child.subpopulation = sub_population
+        return leaf_child
+
+    def get_node_child(self, node, sub_population):
+        """Create a node child for a node.
+
+        Args:
+            node (Node): the parent node.
+            sub_population (numpy.ndarray): boolean array marking
+                which individuals belong to this node.
+
+        Returns:
+            Node: the newly created node.
+        """
+        n = Node()
+        n.depth = node.depth + 1
+        n.sub_population = sub_population
+        return n
+
+    def accuracy(self, test_explanatory, test_target):
+        """Compute the accuracy of the tree's predictions.
+
+        Args:
+            test_explanatory (numpy.ndarray): 2D array of features.
+            test_target (numpy.ndarray): 1D array of true targets.
+
+        Returns:
+            float: the fraction of correct predictions.
+        """
+        return np.sum(np.equal(
+            self.predict(test_explanatory), test_target)) / test_target.size
