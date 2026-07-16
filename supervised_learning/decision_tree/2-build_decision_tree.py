@@ -23,7 +23,8 @@ class Node:
         if self.is_root:
             s = f"root [feature={self.feature}, threshold={self.threshold}]\n"
         else:
-            s = f"-> node [feature={self.feature}, threshold={self.threshold}]\n"
+            s = (f"-> node [feature={self.feature}, "
+                 f"threshold={self.threshold}]\n")
         if self.left_child:
             s += self.left_child_add_prefix(self.left_child.__str__())
         if self.right_child:
@@ -32,7 +33,7 @@ class Node:
 
     def left_child_add_prefix(self, text):
         """Add the left-branch prefix ('|') to each line of text."""
-        lines = text.split("\n")
+        lines = text.rstrip("\n").split("\n")
         new_text = "    +--" + lines[0] + "\n"
         for x in lines[1:]:
             new_text += ("    |  " + x) + "\n"
@@ -40,7 +41,7 @@ class Node:
 
     def right_child_add_prefix(self, text):
         """Add the right-branch prefix (blank) to each line of text."""
-        lines = text.split("\n")
+        lines = text.rstrip("\n").split("\n")
         new_text = "    +--" + lines[0] + "\n"
         for x in lines[1:]:
             new_text += ("       " + x) + "\n"
